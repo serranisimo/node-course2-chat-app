@@ -5,15 +5,16 @@
   "main": "index.js",
   "scripts": {
     "start": "node server/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "export NODE_ENV=test || SET \"NODE_ENV=test\" && mocha  server/**/*.test.js"
   },
   "engines": {
-    "node":"v8.5.0"
+    "node": "v8.5.0"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.2",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "socket.io": "^2.0.4"
   }
 }
