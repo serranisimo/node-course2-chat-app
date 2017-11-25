@@ -18,7 +18,35 @@ io.on("connection",(socket)=>{
     socket.on("disconnect", ()=>{
         console.log("Client disconnected");
     })
+    
+    // socket.emit("newEmail", {
+    //     from: "Mike@example.com",
+    //     text: "Hey, wie gehts?",
+    //     createdAt: 123
+    // });
+
+    socket.emit("newMessage", {
+        from: "server",
+        text: "Hey, wie gehts?",
+        createdAt: new Date().getTime()
+    });
+
+    
+    // socket.on("createEmail", function(newEmail){
+    //     console.log(`createEmail`);
+    //     Object.keys(newEmail).forEach((key)=>{
+    //         console.log(key, `: ${newEmail[key]}`)
+    //     });
+    // });
+
+    socket.on("createMessage", (msg)=>{
+        msg.completedAt= new Date().getTime();
+        Object.keys(msg).forEach((key)=>{
+            console.log(key, `: ${msg[key]}`)
+        });
+    })
 });
+
 
 app.use(express.static(publicPath));
 
