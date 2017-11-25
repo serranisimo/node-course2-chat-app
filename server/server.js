@@ -17,13 +17,27 @@ io.on("connection",(socket)=>{
     
     socket.on("disconnect", ()=>{
         console.log("Client disconnected");
-    })
-
-    socket.emit("newMessage", {
-        from: "server",
-        text: "Hey, wie gehts?",
-        createdAt: new Date().getTime()
     });
+    function newMessage(from, text){     
+        socket.emit("newMessage", {
+            from: from,
+            text: text,
+            createdAt: new Date().getTime()
+        });
+    }
+
+    function broadcastNewMessage(from, text){     
+        socket.broadcast.emit("newMessage", {
+            from: from,
+            text: text,
+            createdAt: new Date().getTime()
+        });
+    }
+    broadcastNewMessage("Admin", "A new User joined!");
+    newMessage("Admin",
+        "Wellcome to the chat app!");
+
+    io.emit("")
 
     socket.on("createMessage", (msg)=>{
         msg.completedAt= new Date().getTime();
@@ -31,6 +45,7 @@ io.on("connection",(socket)=>{
             console.log(key, `: ${msg[key]}`)
         });
         io.emit('newMessage', msg);
+        // socket.broadcast.emit('newMessage', msg);
     })
 });
 
