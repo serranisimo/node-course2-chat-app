@@ -11,7 +11,7 @@ const routesPath = path.join(__dirname, "routes/routes.js");
 const {
     routes
 } = require(routesPath);
-const {generateMessage} = require("./utils/message");
+const {generateMessage, generateLocationMessage} = require("./utils/message");
 
 var server = http.createServer(app);
 var io = socketio(server);
@@ -39,7 +39,13 @@ io.on("connection", (socket) => {
         generateMessage(msg.from, msg.text));
         // socket.broadcast.emit('newMessage', msg);
         callback("Greetings from the server");
-    })
+    });
+
+    socket.on('createLocationMessage', (coords)=>{
+        io.emit('newLocationMessage', generateLocationMessage(
+            'Admin', coords.latitude, coords.longitude
+        ))
+    });
 });
 
 
