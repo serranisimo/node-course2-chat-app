@@ -61,26 +61,34 @@ jQuery(document).ready(function () {
     jQuery('#message-form').on('submit', function (e) {
         console.log("Form submited!")
         e.preventDefault();
+        var messageTextBox = jQuery('#text');
         socket.emit('createMessage', {
-            from: jQuery('#from').val(),
-            text: jQuery('#text').val()
+            from: "me"/**jQuery('#from').val()*/,
+            text: messageTextBox.val()
         }, function (data) {
             // jQuery('#message-form')
+            messageTextBox.val('');
         });
     });
 
-    jQuery('#send-location').click(function(){
+    var locationButton = jQuery('#send-location');
+    locationButton.click(function(){
         if(!navigator.geolocation){
             return alert("Geolocation unavailable");
         }
+        locationButton.attr('disabled', true).text('Sending location...');
         navigator.geolocation.getCurrentPosition(function(location){
+            locationButton.removeAttr('disabled').text('Send location');
             console.log(location);
             socket.emit('createLocationMessage', {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude
             })
         }, function(err){
-            alert('Unable to fetch location');
+            if(err){
+                alert('Unable to fetch location');
+            }            
+            locationButton.removeAttr('disabled').text('Send location');
         });
     });
 });

@@ -6,34 +6,26 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        input[type="text"] {
-            width: 100px;
-            height: 30px;
-            border-radius: 5px;
-            background-color: lightblue;
-            margin-left: 2px;
-            position: relative;
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
     <title>Document</title>
 </head>
 
-<body>
-    <h1>Hola</h1>
-    <p>Mundo</p>
+<body class="chat">
+    <div class="chat__sidebar">
+        <h3>People</h3>
+        <div id="users"></div>
+    </div>
 
-    <ol id="messages"></ol>
-    <button id="send-location">Send location</button    >
-    <form id="message-form">
-        <label>From
-            <input type="text" name="from" id="from" placeholder="From">
-        </label>
-        <label>Text
-            <input type="text" name="message" id="text" placeholder="Message">
-        </label>
-        <input type="submit" value="submit">
-    </form>
+    <div class="chat__main">
+        <ol id="messages" class="chat__messages"></ol>
+        <div class="chat__footer">
+            <form id="message-form" >                
+                <input type="text" name="message"  id="text" placeholder="Message" autofocus autocomplete="off">
+                <button>Send</button>
+            </form>
+            <button  id="send-location">Send location</button>
+        </div>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/index.js"></script>

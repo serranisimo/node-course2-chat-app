@@ -37,8 +37,8 @@ io.on("connection", (socket) => {
     socket.on("createMessage", (msg, callback) => {        
         io.emit('newMessage', 
         generateMessage(msg.from, msg.text));
-        // socket.broadcast.emit('newMessage', msg);
-        callback("Greetings from the server");
+        //callback is called to tell the client when the server processing is done
+        callback();
     });
 
     socket.on('createLocationMessage', (coords)=>{
