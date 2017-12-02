@@ -5,6 +5,10 @@ function addToMessages(li){
     jQuery('#messages').append(li);
 }
 
+function createTimeStamp(time){
+    return moment(time).format('h:mm a');
+}
+
 var socket = io();
 socket.on("connect", function () {
     console.log("Connected");
@@ -19,20 +23,20 @@ socket.on("disconnect", function () {
     console.log("Disconnected from server");
 });
 
-socket.on("newMessage", function (msg) {
+socket.on("newMessage", function (message) {
     console.log("New message");
-    Object.keys(msg).forEach(function (key) {
-        console.log(key, `: ${msg[key]}`);
+    Object.keys(message).forEach(function (key) {
+        console.log(key, `: ${message[key]}`);
     });
     var li = jQuery('<li></li>');
-    li.text(`${msg.from.toString()}: ${msg.text.toString()}`);
+    li.text(`${message.from.toString()} ${createTimeStamp(message.createdAt)}: ${message.text.toString()}`);
     addToMessages(li);
 });
 
 socket.on('newLocationMessage', function(message){
     var li = jQuery('<li></li>');
     var a = jQuery('<a>My current location</a>');
-    li.text(`${message.from}: `);
+    li.text(`${message.from} ${createTimeStamp(message.createdAt)}: `);
     a.attr('target', 'blank');
     a.attr('href', message.url);
     li.append(a);
