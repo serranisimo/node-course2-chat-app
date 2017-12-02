@@ -1,14 +1,33 @@
 /**
  * Private functions
  */
-function addToMessages(li){
-    jQuery('#messages').append(li);
+function addToMessages(message) {
+    var html, template;
+    if (!message.url) {
+            template = jQuery('#message-template').html();
+            html = Mustache.render(template, {
+            from: message.from,
+            text: message.text,
+            createdAt: message.createdAt
+        });
+    } else {
+            template = jQuery('#location-message-template').html();
+            html = Mustache.render(template, {
+            from: message.from,
+            url: message.url,
+            createdAt: message.createdAt
+        });
+    }
+    jQuery('#messages').append(html);
 }
 
-function createTimeStamp(time){
+function createTimeStamp(time) {
     return moment(time).format('h:mm a');
 }
-
+/**
+ * ***********************************************************************************************
+ * Socket events
+ */
 var socket = io();
 socket.on("connect", function () {
     console.log("Connected");
@@ -24,24 +43,13 @@ socket.on("disconnect", function () {
 });
 
 socket.on("newMessage", function (message) {
-    console.log("New message");
-    Object.keys(message).forEach(function (key) {
-        console.log(key, `: ${message[key]}`);
-    });
-    var li = jQuery('<li></li>');
-    li.text(`${message.from.toString()} ${createTimeStamp(message.createdAt)}: ${message.text.toString()}`);
-    addToMessages(li);
+    message.createdAt = createTimeStamp(message.createdAt)
+    addToMessages(message);
 });
 
-socket.on('newLocationMessage', function(message){
-    var li = jQuery('<li></li>');
-    var a = jQuery('<a>My current location</a>');
-    li.text(`${message.from} ${createTimeStamp(message.createdAt)}: `);
-    a.attr('target', 'blank');
-    a.attr('href', message.url);
-    li.append(a);
-    addToMessages(li);
-    
+socket.on('newLocationMessage', function (message) {
+    message.createdAt = createTimeStamp(message.createdAt);
+    addToMessages(message);
 });
 
 // socket.emit('createMessage', {
@@ -60,6 +68,11 @@ function createMessage(from, text) {
     });
 };
 
+/**
+ * 
+ * ***********************************************************************************************
+ * GUI events
+ */
 jQuery(document).ready(function () {
 
     jQuery('#message-form').on('submit', function (e) {
@@ -67,7 +80,7 @@ jQuery(document).ready(function () {
         e.preventDefault();
         var messageTextBox = jQuery('#text');
         socket.emit('createMessage', {
-            from: "me"/**jQuery('#from').val()*/,
+            from: "me" /**jQuery('#from').val()*/ ,
             text: messageTextBox.val()
         }, function (data) {
             // jQuery('#message-form')
@@ -76,22 +89,22 @@ jQuery(document).ready(function () {
     });
 
     var locationButton = jQuery('#send-location');
-    locationButton.click(function(){
-        if(!navigator.geolocation){
+    locationButton.click(function () {
+        if (!navigator.geolocation) {
             return alert("Geolocation unavailable");
         }
         locationButton.attr('disabled', true).text('Sending location...');
-        navigator.geolocation.getCurrentPosition(function(location){
+        navigator.geolocation.getCurrentPosition(function (location) {
             locationButton.removeAttr('disabled').text('Send location');
             console.log(location);
             socket.emit('createLocationMessage', {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude
             })
-        }, function(err){
-            if(err){
+        }, function (err) {
+            if (err) {
                 alert('Unable to fetch location');
-            }            
+            }
             locationButton.removeAttr('disabled').text('Send location');
         });
     });
