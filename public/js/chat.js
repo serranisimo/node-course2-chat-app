@@ -1,22 +1,25 @@
 /**
- * Private functions
+ * *************************************************************************************************************
+ * Help functions
  */
 function addToMessages(message) {
     var html, template;
     if (!message.url) {
             template = jQuery('#message-template').html();
             html = Mustache.render(template, {
-            from: message.from,
-            text: message.text,
-            createdAt: message.createdAt
-        });
+                from: message.from,
+                text: message.text,
+                createdAt: message.createdAt
+            }
+        );
     } else {
             template = jQuery('#location-message-template').html();
             html = Mustache.render(template, {
-            from: message.from,
-            url: message.url,
-            createdAt: message.createdAt
-        });
+                from: message.from,
+                url: message.url,
+                createdAt: message.createdAt
+            }
+        );
     }
     jQuery('#messages').append(html);
 }
@@ -24,18 +27,45 @@ function addToMessages(message) {
 function createTimeStamp(time) {
     return moment(time).format('h:mm a');
 }
+
 /**
  * ***********************************************************************************************
- * Socket events
+ * Function to handle scrolling to the bottom of the chat page
+ */
+function scrollToBottom(){
+    //Selectors
+    var messages = jQuery('#messages');
+    var newMessage = messages.children('li:last-child');
+    //Heights
+    var clientHeight = messages.prop('clientHeight'); 
+    var scrollTop = messages.prop('scrollTop');
+    var scrollHeight = messages.prop('scrollHeight');
+    var newMessageHeight = newMessage.innerHeight();
+    var lastMessageHeight = newMessage.prev().innerHeight();
+
+    /**
+     * Condition for scrolling to the bottom
+     * First alternative: scrolls down everytime somebody writes a message
+     * Second alternative: does not scroll down if the user is not under the "before last" message
+     */
+    var scrollingCondition;
+    //****************************************************
+    // First alternative
+    // scrollingCondition = clientHeight + scrollTop < scrollHeight;
+    //****************************************************
+    // Second alternative
+    scrollingCondition = scrollTop + clientHeight + newMessageHeight + lastMessageHeight >= scrollHeight;
+    if(scrollingCondition){
+        messages.prop('scrollTop', scrollHeight - clientHeight);
+    }
+}
+/**
+ * ***********************************************************************************************
+ * Socket event handlers
  */
 var socket = io();
 socket.on("connect", function () {
     console.log("Connected");
-
-    // socket.emit("createMessage", {
-    //     from: "client1",
-    //     text: "answer"
-    // });
 });
 
 socket.on("disconnect", function () {
@@ -45,19 +75,14 @@ socket.on("disconnect", function () {
 socket.on("newMessage", function (message) {
     message.createdAt = createTimeStamp(message.createdAt)
     addToMessages(message);
+    scrollToBottom();
 });
 
 socket.on('newLocationMessage', function (message) {
     message.createdAt = createTimeStamp(message.createdAt);
     addToMessages(message);
+    scrollToBottom();
 });
-
-// socket.emit('createMessage', {
-//     from: 'Mark',
-//     text: `Hi, this is ${navigator.appVersion}`
-// }, function(data){
-//     console.log("Message Created", data);
-// });
 
 function createMessage(from, text) {
     socket.emit('createMessage', {
@@ -76,7 +101,7 @@ function createMessage(from, text) {
 jQuery(document).ready(function () {
 
     jQuery('#message-form').on('submit', function (e) {
-        console.log("Form submited!")
+        
         e.preventDefault();
         var messageTextBox = jQuery('#text');
         socket.emit('createMessage', {
