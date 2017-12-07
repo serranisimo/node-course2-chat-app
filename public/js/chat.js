@@ -66,10 +66,30 @@ function scrollToBottom(){
 var socket = io();
 socket.on("connect", function () {
     console.log("Connected");
+    var params = $.deparam(window.location.search.substr(1));
+    socket.emit('join', params, function(err){
+        if (err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            console.log('No error by joining room');
+        }
+    });
 });
 
 socket.on("disconnect", function () {
     console.log("Disconnected from server");
+});
+
+
+socket.on("updateUserList", function(users){
+    console.log('Users list',users);
+    var ul = jQuery('<ol></ol>');
+    users.forEach(function(user){
+        ul.append(jQuery('<li></li>').text(user));
+    });
+
+    jQuery('#users').html(ul);
 });
 
 socket.on("newMessage", function (message) {

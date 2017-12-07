@@ -11,37 +11,65 @@ const routesPath = path.join(__dirname, "routes/routes.js");
 const {
     routes
 } = require(routesPath);
-const {generateMessage, generateLocationMessage} = require("./utils/message");
+const {
+    generateMessage,
+    generateLocationMessage
+} = require("./utils/message");
+const {
+    isRealString
+} = require('./utils/validation');
+
+const {Users} = require('./utils/users');
 
 var server = http.createServer(app);
 var io = socketio(server);
+var users = new Users();
+
 io.on("connection", (socket) => {
     console.log("New user connected");
 
-    socket.on("disconnect", () => {
-        console.log("Client disconnected");
+    socket.on('join', (params, callback) => {
+        if (!isRealString(params.name) || !isRealString(params.room)) {
+            callback('Name and room name are required')
+        } else {
+            socket.join(params.room);
+            users.removeUser(socket.id);
+            users.addUser(socket.id, params.name, params.room);
+
+            io.to(params.room).emit('updateUserList', users.getUsersList(params.room));
+            socket.broadcast.to(params.room).emit("newMessage", generateMessage("Admin",`${params.name} has joined`));
+
+            socket.emit("newMessage", generateMessage(/*from*/"Admin",/*message*/"Wellcome to the chat app!"));
+            callback();
+        }
+            /**
+             * socket.leave(room) --> leaves a room
+             * 
+             * io.emit -> sends message to everyone
+             * socket.broadcast.emit -> sends message to everyone except to the sender
+             * socket.emit -> sends message to sender
+             * io.to(room) -> sends message to an specific user
+             * socket.broadcast.to(room).emit --> sends message to everyone in the room except for the sender
+             */
     });
 
-    socket.broadcast.emit("newMessage",
-        generateMessage(
-            "Admin", 
-            "A new User joined!"
-        )
-    );
+    socket.on("disconnect", () => {
+        console.log("Client disconnected");
+        var user = users.removeUser(socket.id);
+        if(user){
+            io.to(user.room).emit('updateUserList', users.getUsersList(user.room));            
+            io.to(user.room).emit('newMessage', generateMessage('Admin', `The user ${user.name} has left`));
+        }
+    });
 
-    socket.emit("newMessage",
-        generateMessage("Admin",
-            "Wellcome to the chat app!")
-    );
-
-    socket.on("createMessage", (msg, callback) => {        
-        io.emit('newMessage', 
-        generateMessage(msg.from, msg.text));
+    socket.on("createMessage", (msg, callback) => {
+        io.emit('newMessage',
+            generateMessage(msg.from, msg.text));
         //callback is called to tell the client when the server processing is done
         callback();
     });
 
-    socket.on('createLocationMessage', (coords)=>{
+    socket.on('createLocationMessage', (coords) => {
         io.emit('newLocationMessage', generateLocationMessage(
             'Admin', coords.latitude, coords.longitude
         ))
