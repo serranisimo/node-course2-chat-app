@@ -19,7 +19,9 @@ const {
     isRealString
 } = require('./utils/validation');
 
-const {Users} = require('./utils/users');
+const {
+    Users
+} = require('./utils/users');
 
 var server = http.createServer(app);
 var io = socketio(server);
@@ -37,41 +39,45 @@ io.on("connection", (socket) => {
             users.addUser(socket.id, params.name, params.room);
 
             io.to(params.room).emit('updateUserList', users.getUsersList(params.room));
-            socket.broadcast.to(params.room).emit("newMessage", generateMessage("Admin",`${params.name} has joined`));
+            socket.broadcast.to(params.room).emit("newMessage", generateMessage("Admin", `${params.name} has joined`));
 
-            socket.emit("newMessage", generateMessage(/*from*/"Admin",/*message*/"Wellcome to the chat app!"));
+            socket.emit("newMessage", generateMessage( /*from*/ "Admin", /*message*/ "Wellcome to the chat app!"));
             callback();
         }
-            /**
-             * socket.leave(room) --> leaves a room
-             * 
-             * io.emit -> sends message to everyone
-             * socket.broadcast.emit -> sends message to everyone except to the sender
-             * socket.emit -> sends message to sender
-             * io.to(room) -> sends message to an specific user
-             * socket.broadcast.to(room).emit --> sends message to everyone in the room except for the sender
-             */
+        /**
+         * socket.leave(room) --> leaves a room
+         * 
+         * io.emit -> sends message to everyone
+         * socket.broadcast.emit -> sends message to everyone except to the sender
+         * socket.emit -> sends message to sender
+         * io.to(room) -> sends message to an specific user
+         * socket.broadcast.to(room).emit --> sends message to everyone in the room except for the sender
+         */
     });
 
     socket.on("disconnect", () => {
         console.log("Client disconnected");
         var user = users.removeUser(socket.id);
-        if(user){
-            io.to(user.room).emit('updateUserList', users.getUsersList(user.room));            
+        if (user) {
+            io.to(user.room).emit('updateUserList', users.getUsersList(user.room));
             io.to(user.room).emit('newMessage', generateMessage('Admin', `The user ${user.name} has left`));
         }
     });
 
     socket.on("createMessage", (msg, callback) => {
-        io.emit('newMessage',
-            generateMessage(msg.from, msg.text));
-        //callback is called to tell the client when the server processing is done
+        var user = users.getUser(socket.id);
+        if (isRealString(msg.text) && user) {
+            io.to(user.room).emit('newMessage',
+                generateMessage(user.name, msg.text));
+            //callback is called to tell the client when the server processing is done
+        }
         callback();
     });
 
     socket.on('createLocationMessage', (coords) => {
-        io.emit('newLocationMessage', generateLocationMessage(
-            'Admin', coords.latitude, coords.longitude
+        var user = users.getUser(socket.id);
+        io.to(user.room).emit('newLocationMessage', generateLocationMessage(
+            user.name, coords.latitude, coords.longitude
         ))
     });
 });

@@ -125,7 +125,7 @@ jQuery(document).ready(function () {
         e.preventDefault();
         var messageTextBox = jQuery('#text');
         socket.emit('createMessage', {
-            from: "me" /**jQuery('#from').val()*/ ,
+            from: $.deparam(window.location.search.substr(1)).name /**jQuery('#from').val()*/ ,
             text: messageTextBox.val()
         }, function (data) {
             // jQuery('#message-form')
