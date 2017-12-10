@@ -34,6 +34,9 @@ io.on("connection", (socket) => {
         if (!isRealString(params.name) || !isRealString(params.room)) {
             callback('Name and room name are required')
         } else {
+            //This should make rooms case insensitive
+            params.room = params.room.toUpperCase();
+
             socket.join(params.room);
             users.removeUser(socket.id);
             users.addUser(socket.id, params.name, params.room);
