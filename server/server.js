@@ -66,9 +66,9 @@ io.on("connection", (socket) => {
     socket.on('checkCredentials',(params, callback)=>{
         if (!isRealString(params.name) || !isRealString(params.room)) {
             callback('Name and room name are required');
-        } else if (users.isUserNameTaken(params.name).length > 0) {console.log("sssssssssssssssssssssssssssssss")            
+        } else if (users.isUserNameTaken(params.name).length > 0) {
             callback('Name is already being used');
-        }else{console.log("eeeeeeeeeeeeeeeeeeeeeeeee")
+        }else{
             callback();
         }
     });
@@ -85,8 +85,9 @@ io.on("connection", (socket) => {
     socket.on("createMessage", (msg, callback) => {
         var user = users.getUser(socket.id);
         if (isRealString(msg.text) && user) {
-            io.to(user.room).emit('newMessage',
-                generateMessage(user.name, msg.text));
+            io.to(user.room)
+                .emit('newMessage', generateMessage(user.name, msg.text)
+            );
             //callback is called to tell the client when the server processing is done
         }
         callback();
@@ -96,7 +97,7 @@ io.on("connection", (socket) => {
         var user = users.getUser(socket.id);
         io.to(user.room).emit('newLocationMessage', generateLocationMessage(
             user.name, coords.latitude, coords.longitude
-        ))
+        ));
     });
 
     socket.on('fetchRomms', ()=>{
