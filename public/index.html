@@ -2,29 +2,51 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="./css/styles.css">
+    <script src="/js/libs/moment.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Chat | ChatApp</title>
 </head>
 <body class="centered-form">
+    
     <div class="centered-form__form">
-        <form action="/chat.html">
+        <form id="login_form" action="/chat.html">
             <div class="form-field">
                 <h3>Join a Chat</h3>
             </div>
+            <div id="errors"></div>
             <div class="form-field">
                 <label >Display name</label>
-                <input type="text" name="name" autofocus>
+                <input id="user_name" type="text" name="name" autofocus>
             </div>
             <div class="form-field">
                     <label >Room name</label>
-                    <input type="text" name="room" >
+                    <input type="text" name="room" id="room_name" >
             </div>
+            <div class="form-field" id="dropDown_rooms">
+                    <label>Rooms</label>
+                    <select name="rooms" id='rooms_selection' >
+                        <option class="room_option"></option>
+                    </select>
+                </div>
             <div class="form-field">
                 <button>Join</button>
             </div>
         </form>
     </div>    
+    <script id="message-template" type="text/template">
+        {{#rooms}}
+        <option value="{{room}}" class="room_option">{{room}}</option>                
+        {{/rooms}} 
+    </script>
+    <script id="error-template" type="text/template">
+        <p  class="error">{{error}}</option>      
+    </script>
+    <script src="/socket.io/socket.io.js"></script>    
+    <script src="/js/libs/jquery.min.js"></script>
+    <script src="/js/index.js"></script>
+    <script src="/js/libs/mustache.js"></script>
+
 </body>
 </html>

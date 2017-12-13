@@ -31,13 +31,18 @@ io.on("connection", (socket) => {
     console.log("New user connected");
 
     socket.on('join', (params, callback) => {
-        if (!isRealString(params.name) || !isRealString(params.room)) {
-            callback('Name and room name are required')
-        } else {
-            //This should make rooms case insensitive
+        //This should make rooms case insensitive
+        if(params){
             params.room = params.room.toUpperCase();
-
+        }
+        /**Check if the requirements to access a chat are met */
+        if (!isRealString(params.name) || !isRealString(params.room)) {
+            return callback('Name and room name are required');
+        } else if (users.isUserNameTaken(params.name).length > 0) {            
+            return callback('Name is already being used');
+        }else {//handle the join event
             socket.join(params.room);
+            callback();
             users.removeUser(socket.id);
             users.addUser(socket.id, params.name, params.room);
 
@@ -56,6 +61,16 @@ io.on("connection", (socket) => {
          * io.to(room) -> sends message to an specific user
          * socket.broadcast.to(room).emit --> sends message to everyone in the room except for the sender
          */
+    });
+
+    socket.on('checkCredentials',(params, callback)=>{
+        if (!isRealString(params.name) || !isRealString(params.room)) {
+            callback('Name and room name are required');
+        } else if (users.isUserNameTaken(params.name).length > 0) {console.log("sssssssssssssssssssssssssssssss")            
+            callback('Name is already being used');
+        }else{console.log("eeeeeeeeeeeeeeeeeeeeeeeee")
+            callback();
+        }
     });
 
     socket.on("disconnect", () => {
@@ -83,6 +98,10 @@ io.on("connection", (socket) => {
             user.name, coords.latitude, coords.longitude
         ))
     });
+
+    socket.on('fetchRomms', ()=>{
+        socket.emit('roomsListAupdate', {rooms: users.getRooms()});
+    })
 });
 
 

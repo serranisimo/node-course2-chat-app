@@ -10,6 +10,11 @@ button:hover {
     list-style-type: none
 }
 
+#errors{
+    color: red;
+    
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
