@@ -2,27 +2,17 @@ const socketio = require('socket.io');
 const {
     generateMessage,
     generateLocationMessage
-} = require("./utils/message");
+} = require("../utils/message");
 const {
     isRealString
-} = require('./utils/validation');
+} = require('../utils/validation');
 
 const {
     Users
-} = require('./utils/users');
+} = require('../utils/users');
 
 var socket, io;
 var users = new Users();
-
-/**
- * socket.leave(room) --> leaves a room
- * 
- * io.emit -> sends message to everyone
- * socket.broadcast.emit -> sends message to everyone except to the sender
- * socket.emit -> sends message to sender
- * io.to(room) -> sends message to an specific user
- * socket.broadcast.to(room).emit --> sends message to everyone in the room except for the sender
- */
 
 module.exports.socketRoutes = (server) => {
     io = socketio(server);
